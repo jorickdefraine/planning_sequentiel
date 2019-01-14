@@ -1,6 +1,4 @@
 import turtle
-import numpy as np
-
 from collections import defaultdict
 
 scene = turtle.Screen()
@@ -275,16 +273,26 @@ M_cyclique = [[0, 1, 0, 0],
               [0, 0, 0, 1],
               [1, 0, 0, 0]]
 
+
 class Graph():
     def __init__(self, vertices):
+        """
+
+        :param vertices: numéro du sommet, initialise un sommet
+        """
         self.graph = defaultdict(list)
         self.V = vertices
 
     def addEdge(self, u, v):
+        """
+
+        :param u: sommet de départ
+        :param v: sommet d"arrivée
+        :return: crée un arc entre u et v
+        """
         self.graph[u].append(v)
 
     def isCyclicUtil(self, v, visited, recStack):
-
         # Mark current node as visited and
         # adds to recursion stack
         visited[v] = True
@@ -307,6 +315,10 @@ class Graph():
 
     # Returns true if graph is cyclic else false
     def isCyclic(self):
+        """
+
+        :return: True si le graphe est cyclic sinon False
+        """
         visited = [False] * self.V
         recStack = [False] * self.V
         for node in range(self.V):
@@ -317,6 +329,14 @@ class Graph():
 
 
 def sommet(c, x, y):
+    """
+
+    :param c: nom ou numéro du sommet
+    :param x: position x du sommet
+    :param y: position y du sommet
+    :return: dessine un sommet à la position x,y
+    """
+
     tu.color("black")
     tu.seth(0)
     tu.up()
@@ -327,6 +347,15 @@ def sommet(c, x, y):
 
 
 def arc(x, y, z, s, color):
+    """
+
+    :param x: position x de départ du curseur
+    :param y: position y de départ du curseur
+    :param z: position x d'arrivée du curseur
+    :param s: sens de l'arc
+    :param color: couleur de l'arc
+    :return: dessine l'arc allant de x à z
+    """
     tu.seth(0)
     r = 0.5 * abs(x - z)
     tu.color(color)
@@ -348,6 +377,7 @@ def arc(x, y, z, s, color):
 
 def graph(M):
     """
+
     :param M: liste de liste (matrice d'incidence d'un graphe)
     :return: dessine le graphe de matrice d'incidence M
     """
@@ -363,6 +393,11 @@ def graph(M):
 
 
 def checkCycle(g):
+    """
+
+    :param g: matrice d'incidence d'un graphe
+    :return: True si  le graphe contient (avec un message d'erreur) un cycle sinon False
+    """
     G = Graph(len(g))
     for i in range(len(g)):
         for j in range(len(g)):
@@ -385,31 +420,35 @@ def afficher(t):
         print(i + 1, ':', t[i])
 
 
-def vecteur_tp(S):
-    index = []
-    cnt = 0
-    ind2 = []
-    for i in S:
-        ind = S
-        if sum(i) == 0:
-            index.append(ind.index(i) + cnt)
-            ind.remove(i)
-            cnt += 1
-    for i in ind:
-        i2 = i
-        for j in index:
-            # print(i)
-            # print(j)
-            i2.remove(i[j])
-            # print("rm",i)
-        ind2.append(i)
-    return ind
+def planningSequentiel(S):
+    plan = []
+    S3 = []
+    if not checkCycle(S):
+        S2 = S
+        for i in S:
+            if not sum(i):
+                ind = S.index(i)
+                plan.append(ind)
+                S2.remove(i)
+            else:
+                return plan
+
+    for i in plan:
+        for j in S2:
+            j.pop(i)
+            S3.append(j)
+    return planningSequentiel(S3)
 
 
 def main():
+    """
+
+    :return: fonction principale du programme à partir de laquelle on appelle les autres fonctions
+    """
+    print(planningSequentiel(M_acyclique))
     # print(cycle(M2))
-    #print(vecteur_tp(M2))
-    print(checkCycle(M_final))
+    # print(vecteur_tp(M2))
+    # graph(M2)
     scene.exitonclick()
 
 
