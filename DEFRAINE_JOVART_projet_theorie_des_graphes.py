@@ -1,3 +1,4 @@
+import copy
 import turtle
 from collections import defaultdict
 
@@ -7,7 +8,7 @@ tu = turtle.Turtle()
 tu.ondrag(tu.goto)
 tu.speed(0)
 
-M_final = [
+M = [
     [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      0, 0, 0, 0],
@@ -249,30 +250,6 @@ M_final = [
      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      0, 0, 0, 0]]
 
-M = [[0, 1, 0, 0],
-     [0, 0, 1, 0],
-     [0, 0, 0, 1],
-     [0, 0, 0, 0]]
-
-M2 = [[0, 0, 0, 0, 0, 1, 0, 0],
-      [1, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 1, 0, 0, 0],
-      [0, 0, 0, 0, 0, 1, 0, 0],
-      [0, 0, 1, 0, 0, 0, 1, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 1, 0, 0, 0]]
-
-M_acyclique = [[0, 1, 0, 0],
-               [0, 0, 1, 0],
-               [0, 0, 0, 1],
-               [0, 0, 0, 0]]
-
-M_cyclique = [[0, 1, 0, 0],
-              [0, 0, 1, 0],
-              [0, 0, 0, 1],
-              [1, 0, 0, 0]]
-
 
 class Graph():
     def __init__(self, vertices):
@@ -302,10 +279,10 @@ class Graph():
         # if any neighbour is visited and in
         # recStack then graph is cyclic
         for neighbour in self.graph[v]:
-            if visited[neighbour] == False:
-                if self.isCyclicUtil(neighbour, visited, recStack) == True:
+            if not visited[neighbour]:
+                if self.isCyclicUtil(neighbour, visited, recStack):
                     return True
-            elif recStack[neighbour] == True:
+            elif recStack[neighbour]:
                 return True
 
         # The node needs to be poped from
@@ -326,6 +303,19 @@ class Graph():
                 if self.isCyclicUtil(node, visited, recStack) == True:
                     return True
         return False
+
+
+class Node:
+    def __init__(self, nom):
+        self.in_nodes = []
+        self.out_nodes = []
+        self.nom = nom
+
+    def __str__(self):
+        return self.nom
+
+    def __repr__(self):
+        return str(self)
 
 
 def sommet(c, x, y):
@@ -411,33 +401,58 @@ def checkCycle(g):
         return False
 
 
-def afficher(t):
+def planning(S):
     """
-    :param t: vecteur de temps
-    :return: affiche le planning de t sous la forme demandée.
+
+    :param S: vecteur tp des temps
+    :return: affiche le planning au plus vite et le planning séquentiel sous la forme demandé
     """
-    for i in range(len(t)):
-        print(i + 1, ':', t[i])
+    cnt = 0
+    print("Planning au plus vite")
+    for clef in S:
+        print(clef, ':', S[clef])
+
+    print("Planning séquentiel")
+    for clef in S:
+        for element in S[clef]:
+            cnt += 1
+            print(cnt, ':', element)
 
 
-def planningSequentiel(S):
-    plan = []
-    S3 = []
-    if not checkCycle(S):
-        S2 = S
-        for i in S:
-            if not sum(i):
-                ind = S.index(i)
-                plan.append(ind)
-                S2.remove(i)
-            else:
-                return plan
+def plan(M):
+    """
 
-    for i in plan:
-        for j in S2:
-            j.pop(i)
-            S3.append(j)
-    return planningSequentiel(S3)
+    :param M: matrice d'incidence d'un graphe
+    :return: vecteur tp des temps
+    """
+    nodes = [Node(str(i)) for i in range(len(M))]
+    for i, ligne in enumerate(M):
+        ma_node = nodes[i]
+        for j, case in enumerate(ligne):
+            if case:
+                la_node = nodes[j]
+                ma_node.out_nodes.append(la_node)
+                la_node.in_nodes.append(ma_node)
+
+    jours = {}
+    nodes_restantes = nodes[:]
+    jour = 0
+    while len(nodes_restantes):
+        jour = jour + 1
+        nodes_to_remove = []
+        for node in nodes_restantes:
+            node = next(n for n in nodes if n.nom == node.nom)
+            if len(node.in_nodes) == 0:
+                nodes_to_remove.append(node)
+                if jour in jours:
+                    jours[jour].append(node)
+                else:
+                    jours[jour] = [node]
+        for node in nodes_to_remove:
+            nodes_restantes.remove(node)
+            for node_ in node.out_nodes:
+                node_.in_nodes.remove(node)
+    return planning(jours)
 
 
 def main():
@@ -445,10 +460,8 @@ def main():
 
     :return: fonction principale du programme à partir de laquelle on appelle les autres fonctions
     """
-    print(planningSequentiel(M_acyclique))
-    # print(cycle(M2))
-    # print(vecteur_tp(M2))
-    # graph(M2)
+    graph(M)  # affiche graphiquement le graphe entre parenthèse
+    plan(M)  # affiche le planning au plus et vite et le planning séquentiel le graphe entre parenthèse
     scene.exitonclick()
 
 
