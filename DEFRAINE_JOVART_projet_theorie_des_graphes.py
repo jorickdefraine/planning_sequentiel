@@ -264,7 +264,7 @@ class Graph():
         """
 
         :param u: sommet de départ
-        :param v: sommet d"arrivée
+        :param v: sommet d'arrivée
         :return: crée un arc entre u et v
         """
         self.graph[u].append(v)
@@ -294,13 +294,13 @@ class Graph():
     def isCyclic(self):
         """
 
-        :return: True si le graphe est cyclic sinon False
+        :return: True si le graphe est cyclique sinon False
         """
         visited = [False] * self.V
         recStack = [False] * self.V
         for node in range(self.V):
             if visited[node] == False:
-                if self.isCyclicUtil(node, visited, recStack) == True:
+                if self.isCyclicUtil(node, visited, recStack):
                     return True
         return False
 
@@ -386,7 +386,7 @@ def checkCycle(g):
     """
 
     :param g: matrice d'incidence d'un graphe
-    :return: True si  le graphe contient (avec un message d'erreur) un cycle sinon False
+    :return bool: True si le graphe contient (avec un message d'erreur) un cycle sinon False
     """
     G = Graph(len(g))
     for i in range(len(g)):
@@ -394,7 +394,7 @@ def checkCycle(g):
             if g[i][j]:
                 G.addEdge(i, j)
     if G.isCyclic() == 1:
-        print("Le graphe d'entrée comporte un cycle ou/et une symétrie sur sa diagonale, entrez un graphe orienté et "
+        print("Le graphe d'entrée comporte un cycle et/ou une symétrie sur sa diagonale, entrez un graphe orienté et "
               "acyclique s'il vous plait.")
         return True
     else:
